@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trip Organizer</title>
+    <!-- <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAJyDSqTrVeYVDhIPtu4rQ7yKRkkOmEmKU&callback=console.debug&libraries=maps,marker&v=beta">
+    </script> -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""/>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <!-- <div class="logo">
+                <img src="images/logo.png" alt="Logo">
+            </div> -->
+            <nav>
+                <ul id="nav-links">
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#schedules">Schedules</a></li>
+                    <li><a href="#destinations">Destinations</a></li>
+                </ul>
+                <div id="mobile-menu" class="material-icons">menu</div>
+            </nav>
+            <button id="dark-mode-toggle">🌙 Dark Mode</button>
+        </div>
+    </header>
+
+    <main>
+        <!-- Landing Section -->
+        <section class="hero" id="home">
+            <div class="hero-video ">
+                <video autoplay loop muted>
+                    <source src="scenery.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            <div class="hero-text">
+                <h1>Welcome to the Trip Organizer</h1>
+                <p>Plan your perfect trip with ease. Discover destinations, manage schedules, and more.</p>
+                <a href="#schedules" class="cta-button">Get Started</a>
+            </div>
+        </section>
+
+        <div id="map"></div>
+
+        <!-- Schedules Section -->
+        <section class="schedules" id="schedules">
+            <h2>Your Travel Schedules</h2>
+            
+            <form id="new-schedule-form">
+                <!-- <select type="text" id="destination" placeholder="Destination" required> -->
+                <label for="destination">Select Destination</label>
+                <select name="destination" id="destination" required>
+                    <option value="none">Select</option>
+                </select>
+                
+                <div id="hotel-selector"></div>
+
+                <div id='hotelContainer'></div>
+                <input name="date" type="date" id="dateAdd" required>
+                <button type="submit">Add Schedule</button>
+            </form>
+            <div id="schedule-items">
+
+            </div>
+        </section>
+
+        <!-- Day-by-Day Schedules Section -->
+        <section class="day-by-day" id="day-by-day">
+            <h2>Day-by-Day Schedules</h2>
+            <form id="new-day-schedule-form">
+                <input type="number" id="day" placeholder="Day Number" min="1" required>
+                <input type="text" id="day-destination" placeholder="Destination" required>
+                <input type="date" id="day-date" required>
+                <textarea id="day-info" placeholder="Additional Information"></textarea>
+                <button type="submit">Add Day Schedule</button>
+            </form>
+            <div id="day-schedules"></div>
+        </section>
+
+        <!-- Destinations Section -->
+        <section class="destinations" id="destinations">
+            <h2>Top Destinations</h2>
+            <div class="destination-cards">
+                <div class="destination-card">
+                    <img src="data:image/jpeg;base64,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" alt="Destination 1">
+                    <div class="destination-info">
+                        <h3>Jadui Dunia!.....</h3>
+                        <p>Explore the Jadui Dunia, with its iconic landmarks and romantic streets.</p>
+                        <a href="destination-detail.html" class="learn-more">Learn More</a>
+                    </div>
+                </div>
+                <div class="destination-card">
+                    <img src="https://i.pinimg.com/originals/f4/be/88/f4be88670abf275562cd56df7ac22511.jpg" alt="Destination 2">
+                    <div class="destination-info">
+                        <h3>Future City!.......</h3>
+                        <p>Experience the Future City in today Life. Explore all about Future and exprience it.</p>
+                        <a href="destination-detail.html" class="learn-more">Learn More</a>
+                    </div>
+                </div>
+                <!-- Add more destination cards as needed -->
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Trip Organizer. All rights reserved.</p>
+    </footer>
+
+    <!-- Google Maps API -->
+    <script src="destination.js"></script>
+    <script>(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})
+        ({key: "AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg", v: "weekly"});</script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" async defer></script>
+    <script src="script.js"></script>
+</body>
+</html>
